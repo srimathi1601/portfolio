@@ -15,14 +15,14 @@ export default function HeroPhoto() {
       <div data-photo-frame className="relative">
         <div data-photo-reveal className="relative aspect-[4/5] w-full overflow-hidden">
           <div data-photo-img className="absolute inset-0">
-            {/* <Image
+            <Image
               src="/projects/profile.png"
               alt={site.name}
               fill
               priority
               sizes="(min-width: 1024px) 440px, (min-width: 640px) 340px, 260px"
               className="object-cover object-top"
-            /> */}
+            />
           </div>
         </div>
       </div>

@@ -2,26 +2,245 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------ */
+/* Theme tokens: the single source of truth for the dark teal palette.  */
+/* Values are RGB channels so they can be used with alpha everywhere.   */
+/* ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --accent: 38 215 218; /* #26d7da */
+  --accent-light: 120 235 238; /* #78ebee */
+  --accent-deep: 20 160 168; /* #14a0a8 */
+  --accent-glow: 38 215 218; /* big blurred glows, same in both themes */
+  --ink: 5 10 14; /* page background */
+  --surface: 12 20 26; /* raised surfaces */
+  --champagne: 200 220 224; /* body text */
+  --fg: 255 255 255; /* headings */
+  --on-accent: 4 18 20; /* text on accent fills */
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Light theme: pale teal-white paper, deeper teals so accent text keeps its contrast. */
+:root[data-theme="light"] {
+  --accent: 14 116 120;
+  --accent-light: 15 128 133;
+  --accent-deep: 10 90 95;
+  --ink: 244 250 250;
+  --surface: 255 255 255;
+  --champagne: 22 52 56;
+  --fg: 8 28 32;
+  --on-accent: 255 255 255;
+  color-scheme: light;
+}
+
+html {
+  background: rgb(var(--ink));
+}
+
+html.is-locked {
+  overflow: hidden;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-ink font-body text-champagne antialiased;
+  overflow-x: clip;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+::selection {
+  background: rgb(var(--accent) / 0.35);
+  color: #fff;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-heading text-fg;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent-light));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Very light film grain, painted once and never animated. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Custom cursor is only enabled by JS on fine pointers. */
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button {
+  cursor: none;
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
   }
+
+  .section-y {
+    @apply py-24 sm:py-32;
+  }
+
+  .text-accent-gradient {
+    @apply bg-accent-gradient bg-clip-text text-transparent;
+  }
+
+  .eyebrow {
+    @apply mb-5 inline-flex items-center gap-3 font-body text-xs font-medium uppercase tracking-[0.3em] text-accent;
+  }
+
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-8 bg-accent-gradient;
+  }
+
+  .chip {
+    @apply inline-flex items-center whitespace-nowrap rounded-full border border-line bg-surface px-4 py-1.5 text-sm text-champagne transition-colors duration-300;
+  }
+
+  .chip:hover {
+    @apply border-accent/60 text-fg;
+  }
+
+  /* Animated accent underline used by nav links and text links. */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    content: "";
+    @apply absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-accent-gradient transition-transform duration-500;
+  }
+
+  .link-underline:hover::after,
+  .link-underline[aria-current="true"]::after {
+    @apply scale-x-100;
+  }
+
+  /* Gold spotlight that follows the cursor (--mx / --my set from JS). */
+  .spotlight {
+    @apply relative isolate overflow-hidden rounded-2xl border border-line bg-surface transition-[border-color,box-shadow] duration-500;
+  }
+
+  .spotlight::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-500;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgb(var(--accent) / 0.16),
+      transparent 60%
+    );
+  }
+
+  .spotlight:hover,
+  .spotlight:focus-within {
+    @apply border-accent/50 shadow-glow;
+  }
+
+  .spotlight:hover::before,
+  .spotlight:focus-within::before {
+    @apply opacity-100;
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes orb-pulse {
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Projects: pill list edge fades (--fade-start / --fade-end set from JS) */
+/* ------------------------------------------------------------------ */
+.fade-edges {
+  --fade-start: 0px;
+  --fade-end: 0px;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent
+  );
+}
+
+@media (min-width: 1024px) {
+  .fade-edges {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--fade-start),
+      #000 calc(100% - var(--fade-end)),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--fade-start),
+      #000 calc(100% - var(--fade-end)),
+      transparent
+    );
+  }
+}
+
+/* Modal opens in the top layer, above the custom cursor, so bring the system cursor back. */
+dialog[open] {
+  animation: modal-in 0.35s ease-out;
+}
+
+html.has-cursor dialog,
+html.has-cursor dialog * {
+  cursor: auto;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:root[data-theme="light"] .grain {
+  mix-blend-mode: multiply;
 }

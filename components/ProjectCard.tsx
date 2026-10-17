@@ -92,14 +92,14 @@ export default function ProjectCard({ project, onKnowMore }: { project: Project;
           {first && (
             <Magnetic>
               <Button href={first} external>
-                {rest.length ? `View ${hostname(first)}` : "View Live"} <ArrowUpRight />
+                {rest.length ? ` ${hostname(first)}` : "View Live"} <ArrowUpRight />
               </Button>
             </Magnetic>
           )}
           {rest.map((url) => (
             <Magnetic key={url}>
               <Button href={url} external variant="outline">
-                View {hostname(url)} <ArrowUpRight />
+                 {hostname(url)} <ArrowUpRight />
               </Button>
             </Magnetic>
           ))}

@@ -16,7 +16,7 @@ export default function HeroPhoto() {
         <div data-photo-reveal className="relative aspect-[4/5] w-full overflow-hidden">
           <div data-photo-img className="absolute inset-0">
             <Image
-              src="/projects/profile.png"
+              src="/projects/profile.jpg"
               alt={site.name}
               fill
               priority
